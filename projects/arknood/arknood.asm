@@ -19,7 +19,20 @@ start:
                         // bit 4-7 screen memory $0400-$07ff
     sta $d018
     
+    lda #0
+    sta $d021
+    lda #1
+    sta $d020
 
+
+    lda #0  // @
+    sta $0400
+    sta $0400 + 1
+
+    lda #$0f
+    sta $d800   // color memory
+    lda #$03
+    sta $d800 + 1
 
 main:
     jmp main
