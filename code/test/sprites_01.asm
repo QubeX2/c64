@@ -1,5 +1,5 @@
 BasicUpstart2(start)
-        * = $1000 "Main Program"
+    *= $1000 "Main Program"
 
 screenDataPtr:  .word 0
 colorDataPtr:   .word 0
@@ -116,7 +116,7 @@ main:
 	rts
 
 // Sprite bitmaps 1 x 64 bytes
-*=$0A00
+    *= $0A00
 // sprite #0
 	.byte $00,$AA, $00, $02, $AA, $80, $0A, $AA, $A0, $0A, $AA, $A0, $2A, $AA, $A8, $29, $AA, $68, $25, $69, $58
 	.byte $A5, $69, $5A, $AF, $6B, $DA, $AF, $6B, $DA, $AF, $6B, $DA, $A9, $AA, $6A, $AA, $AA, $AA, $AA, $AA, $AA
@@ -125,7 +125,7 @@ main:
 
 
 // Character bitmap definitions 2k
-*=$2000
+    *= $2000
 	.byte	$3C, $66, $6E, $6E, $60, $62, $3C, $00
 	.byte	$18, $3C, $66, $7E, $66, $66, $66, $00
 	.byte	$7C, $66, $66, $7C, $66, $66, $7C, $00
