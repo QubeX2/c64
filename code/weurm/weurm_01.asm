@@ -25,7 +25,7 @@ start:
         sta $d020
 
         ldx #$ff
-clr:    lda #$20
+clrs:   lda #$20
         sta $0400,x
         sta $0500,x
         sta $0600,x
@@ -37,65 +37,123 @@ clr:    lda #$20
         sta $da00,x
         sta $db00,x
         dex
-        bne clr
-
-        lda #<screenMem
-        sta $fb
-        lda #>screenMem
-        sta $fc
-
-        lda #<list
-        sta $f8
-        lda #>list
-        sta $f9
-
-        .break
+        bne clrs
         
-main:   lda dir
+main:   
+        ldx #$20        // space (32)
+        jsr draw
+        
+// ---------------------------------------------------------------
+// MOVE
+// ---------------------------------------------------------------
+        lda #<list
+        sta $f7
+        lda #>list
+        sta $f8
+        
+        lda dir
 cmp0:   cmp #0                  // up
         bne cmp1
-        lda list + 1
+        ldy #1
+        lda ($f7),y
         sec
         sbc #1
-        sta list + 1
+        sta ($f7),y
 
 cmp1:   lda dir
         cmp #1                  // right
         bne cmp2
-        lda list
+        ldy #0
+        lda ($f7),y
         clc
         adc #1
-        sta list
+        sta ($f7),y
 
 cmp2:   lda dir
         cmp #2                  // down
         bne cmp3
-        lda list + 1
+        ldy #1
+        lda ($f7),y
         clc
         adc #1
-        sta list + 1
+        sta ($f7),y
 
 cmp3:   lda dir
         cmp #3                  // left
         bne cmpd
-        lda list
+        ldy #0
+        lda ($f7),y
         sec
         sbc #1
-        sta list
+        sta ($f7),y
 
-cmpd:   
+cmpd:   ldx #$51
         jsr draw
-        //jsr waitRaster
-        //jsr waitRaster
+        ldx #$10
+wr:     jsr waitRaster
+        jsr key
+        dex
+        bne wr
         jmp main
 
-draw:   lda list + 2
-        ldy list
-        ldx list + 1
-        sta ($fb), y
+// ---------------------------------------------------------------
+// DRAW
+// ---------------------------------------------------------------
+draw:   lda #<screenMem         // lsb
+        sta $fb                 // 00
+        lda #>screenMem         // msb
+        sta $fc                 // 04
+
+        ldy list + 1            // y-coord
+        beq col
+row:    lda $fb
+        clc
+        adc #40
+        sta $fb
+        bcc row2
+        inc $fc                 // inc y if carry
+row2:   dey                     // loop add #40
+        bne row        
+
+col:    lda $fb
+        clc
+        adc list
+        sta $fb
+        bcc d
+        inc $fc        
+
+d:      ldy #0
+        txa
+        sta ($fb), y 
         rts
 
+// ---------------------------------------------------------------
+// KEY
+// ---------------------------------------------------------------
+key:    lda $c5
+        cmp #$12        // d
+        bne key1
+        ldy #1
+        sty dir
+
+key1:   cmp #$0d        // s
+        bne key2
+        ldy #2
+        sty dir
+
+key2:   cmp #$0a        // a
+        bne key3
+        ldy #3
+        sty dir
+
+key3:   cmp #$09        // w
+        bne keyd
+        ldy #0
+        sty dir
+keyd:   rts
+
+
         *=$2000
-dir:    .byte 1                 // 0 = up, 1 = right, 2 = down, 3 = left
+dir:    .byte 2                 // 0 = up, 1 = right, 2 = down, 3 = left
 end:    .byte 1
-list:   .fill 256, [0, 0, $51]
+list:   .fill 256, [0, 0]
